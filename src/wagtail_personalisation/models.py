@@ -1,4 +1,5 @@
 from __future__ import absolute_import, unicode_literals
+import itertools
 
 from django.db import models
 from django.template.defaultfilters import slugify
@@ -76,11 +77,10 @@ class Segment(ClusterableModel):
 
     def get_rules(self):
         """Retrieve all rules in the segment."""
-        rules = AbstractBaseRule.__subclasses__()
-        segment_rules = []
-        for rule in rules:
-            segment_rules += rule.objects.filter(segment=self)
-        return segment_rules
+        related_rules = [rule.objects.filter(segment=self)
+                         for rule in AbstractBaseRule.__subclasses__()]
+
+        return list(itertools.chain(*related_rules))
 
 
 class PersonalisablePageMixin(models.Model):
